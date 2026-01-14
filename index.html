@@ -18,6 +18,7 @@
     referrer: document.referrer,
     timestamp: new Date().toISOString()
   };
+  console.log(payload) ;
 
   if (!payload.user_id || !payload.campaign_id) return;
 
