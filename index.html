@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>You Have Been Phished</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0f1a;
+    color: #fff;
+    text-align: center;
+  }
+
+  .container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+  }
+
+  h1 {
+    color: #f39c12;
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+
+  p {
+    max-width: 800px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+
+  .notice {
+    margin-top: 30px;
+    font-size: 0.95rem;
+    opacity: 0.7;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>You Have Been Phished</h1>
+  <p>
+    This was a simulated phishing exercise designed to help you recognize
+    suspicious emails and links. Always verify links before clicking and
+    report suspicious emails to your IT team.
+  </p>
+
+  <div class="notice">
+    This action has been recorded for training purposes.
+  </div>
+</div>
+
+<script>
+/* ===============================
+   CONFIG
+================================ */
+const API_ENDPOINT = "https://dev.aisim360.com/api/click";
+
+/* ===============================
+   UTILITIES
+================================ */
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+function sendClickEvent(payload) {
+  navigator.sendBeacon(
+    API_ENDPOINT,
+    new Blob([JSON.stringify(payload)], { type: "application/json" })
+  );
+}
+
+/* ===============================
+   MAIN LOGIC
+================================ */
+(function () {
+  const userId   = getParam("id");
+  const cid      = getParam("cid");
+  const company  = getParam("company");
+  const preview  = getParam("preview") === "1";
+
+  // Abort if required params missing
+  if (!userId || !cid) return;
+
+  // Prevent preview/admin clicks
+  if (preview) {
+    console.log("Preview click detected – not logged");
+    return;
+  }
+
+  // Prevent duplicate logging in same session
+  const sessionKey = `clicked_${cid}_${userId}`;
+  if (sessionStorage.getItem(sessionKey)) return;
+  sessionStorage.setItem(sessionKey, "1");
+
+  // Initial click event (page load)
+  const payload = {
+    id: userId,
+    cid: cid,
+    company: company || null,
+    event: "page_load",
+    ts: new Date().toISOString()
+  };
+
+  sendClickEvent(payload);
+
+  /* ===============================
+     HUMAN BEHAVIOR SIGNALS
+  ================================ */
+
+  // Stayed on page > 5 seconds (human indicator)
+  setTimeout(() => {
+    sendClickEvent({
+      ...payload,
+      event: "human_stay"
+    });
+  }, 5000);
+
+  // Mouse movement detection
+  let moved = false;
+  document.addEventListener("mousemove", () => {
+    if (moved) return;
+    moved = true;
+    sendClickEvent({
+      ...payload,
+      event: "mouse_move"
+    });
+  }, { once: true });
+
+})();
+</script>
+</body>
+</html>
