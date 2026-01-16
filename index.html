@@ -22,7 +22,7 @@
 
   if (!payload.user_id || !payload.campaign_id) return;
 
-  fetch("http://127.0.0.1:5000//api/track-click", {
+  fetch("http://127.0.0.1:5000/api/track-click", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
