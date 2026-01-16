@@ -9,13 +9,14 @@
 <script>
 (function () {
   const params = new URLSearchParams(window.location.search);
-
+  const is_bot = params.get("bot") === "1"; 
   const payload = {
     user_id: params.get("id"),
     campaign_id: params.get("cid"),
     company: params.get("company"),
     user_agent: navigator.userAgent,
     referrer: document.referrer,
+    is_bot:is_bot,
     timestamp: new Date().toISOString()
   };
   console.log(payload) ;
