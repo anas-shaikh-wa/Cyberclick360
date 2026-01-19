@@ -45,7 +45,7 @@
     const validate = await fetch("https://dev.aisim360.com/api/validate-rid", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rid })
+      body: JSON.stringify({ rid, is_bot})
     });
 
     if (!validate.ok) {
