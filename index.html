@@ -1,24 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Loading…</title>
+  <title>Secure Document</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6f8;
+      margin: 0;
+      padding: 40px;
+    }
+    .card {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+    .error {
+      text-align: center;
+      color: #b00020;
+    }
+  </style>
 </head>
 <body>
-  <p>Loading document…</p>
+
+<div id="app"></div>
 
 <script>
 (async function () {
+  const app = document.getElementById("app");
   const params = new URLSearchParams(window.location.search);
   const rid = params.get("rid");
   const is_bot = params.get("bot") === "1";
 
   if (!rid) {
-    document.body.innerHTML = "<h3>This page does not exist.</h3>";
+    app.innerHTML = `<h3 class="error">This page does not exist.</h3>`;
     return;
   }
 
   try {
-    // STEP 1: validate RID
+    // 1️⃣ Validate RID
     const validate = await fetch("https://dev.aisim360.com/api/validate-rid", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -26,27 +49,57 @@
     });
 
     if (!validate.ok) {
-      document.body.innerHTML =
-        "<h3>This page does not exist or has expired.</h3>";
+      app.innerHTML = `<h3 class="error">This page does not exist or has expired.</h3>`;
       return;
     }
 
-    // STEP 2: track click (only if valid)
+    // 2️⃣ Track click
     await fetch("https://dev.aisim360.com/api/track-click", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        rid: rid,
-        is_bot: is_bot,
+        rid,
+        is_bot,
         user_agent: navigator.userAgent,
-        referrer: document.referrer,
-        timestamp: new Date().toISOString()
+        referrer: document.referrer
       })
     });
 
+    // 3️⃣ Render the page HERE (no redirect)
+    app.innerHTML = `
+    <title>Phishing</title>
+  <style>
+      @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
+      body {background-color: #f4f7f6; margin: 0px auto; font-family: 'Montserrat', sans-serif;}
+      h1 {color:#0095cb; font-weight: 700; text-align: center;}
+      .container{max-width: 1024px; margin: 0px auto; background-color: #fff; padding: 40px 50px 50px; border: 1px solid #d2e1e8;}
+      .video-block { padding: 30px; background-color: #333; margin-top: 30px; text-align: center; }
+      .video-block video { width: 768px; height: auto;}
+      .footer {max-width: 1024px; margin: 0px auto; background-color: #bcd4da; padding: 10px 50px; font-size: 12px; border: 1px solid #d2e1e8;}
+      hr.style-two { border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)); }
+      .cyber-img img {width: 122px; text-align: center;   margin: 0 auto -28px; }
+      .cyber-img {margin: auto; width: 125px;}
+      .note{font-size: 14px; background-color:rgb(221, 174, 174); color:#000; padding: 10px;}
+      b {font-weight: 700}
+      @media screen and (max-width: 900px) {
+        .video-block video { width: 100%; height: auto;}
+      }
+    </style>
+    
+       <div class="container">
+      <div><div class="cyber-img"><img src="cyberboy.png" alt="Cyber Phishing"></div><div><hr class="style-two"></div></div>
+    <h1>You have been caught in phishing, <br>therefore, enrolled for phishing training</h1>
+    <div class="content">bbbBusiness Email Compromises are sophisticated form of phishing (typically in the form of an email) that use public company information to imitate your colleagues or supervisors. Learn how to recognize one and protect yourself and your company!</div>
+    <div class="video-block">
+      <iframe src="https://player.vimeo.com/video/336309030" width="1024" height="424" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    </div>
+    <div class="note"><b>Note:</b> Contact your manager regarding the phishing training or follow the link provided in the mail</div>
+    </div>
+    <div class="footer">©2024 – All Rights Reserved</div>
+    `;
+
   } catch (e) {
-    document.body.innerHTML =
-      "<h3>This page does not exist or has expired.</h3>";
+    app.innerHTML = `<h3 class="error">This page does not exist or has expired.</h3>`;
   }
 })();
 </script>
